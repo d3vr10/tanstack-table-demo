@@ -1,101 +1,285 @@
-import Image from "next/image";
+"use client";
+import {useCallback, useMemo, useState} from "react";
+import {flexRender, getCoreRowModel, getFilteredRowModel, useReactTable} from "@tanstack/react-table";
+import clsx from "clsx";
+import _ from "lodash"
+import {
+    CodeIcon,
+    FileArchive,
+    FileArchiveIcon,
+    LucideMessageCircleQuestion,
+    Settings,
+    SettingsIcon,
+    UserIcon
+} from "lucide-react"
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+type Task = {
+    id: string;
+    name: string;
+    description: string;
+    dueDate: string;
+    priority: string;
+    status: string;
+    assignedTo: string;
+    createdDate: string;
+    tags?: string[];
+}
+
+export const data: Task[] = [
+    {
+        "id": "1",
+        "name": "Finish report",
+        "description": "Complete the quarterly financial report.",
+        "dueDate": "2024-11-30",
+        "priority": "High",
+        "status": "In Progress",
+        "assignedTo": "Alice",
+        "createdDate": "2024-11-01",
+        "tags": ["Finance", "Reports"]
+    },
+    {
+        "id": "2",
+        "name": "Team meeting",
+        "description": "Schedule and prepare for the team meeting next week.",
+        "dueDate": "2024-11-25",
+        "priority": "Medium",
+        "status": "Not Started",
+        "assignedTo": "Bob",
+        "createdDate": "2024-11-10",
+        "tags": ["Meetings", "Team"]
+    },
+    {
+        "id": "3",
+        "name": "Update website",
+        "description": "Revise the homepage layout and content.",
+        "dueDate": "2024-12-05",
+        "priority": "High",
+        "status": "Not Started",
+        "assignedTo": "Carol",
+        "createdDate": "2024-11-15",
+        "tags": ["Web Development"]
+    },
+    {
+        "id": "4",
+        "name": "Client follow-up",
+        "description": "Reach out to clients for feedback on recent services.",
+        "dueDate": "2024-11-22",
+        "priority": "Medium",
+        "status": "Done",
+        "assignedTo": "David",
+        "createdDate": "2024-11-05",
+        "tags": ["Client Relations"]
+    },
+    {
+        "id": "5",
+        "name": "Research competitors",
+        "description": "Analyze competitors' strategies and performance.",
+        "dueDate": "2024-12-10",
+        "priority": "Low",
+        "status": "In Progress",
+        "assignedTo": "Alice",
+        "createdDate": "2024-11-12",
+        "tags": ["Research", "Strategy"]
+    },
+    {
+        "id": "6",
+        "name": "Prepare presentation",
+        "description": "Create slides for the upcoming conference presentation.",
+        "dueDate": "2024-11-28",
+        "priority": "High",
+        "status": "Not Started",
+        "assignedTo": "Bob",
+        "createdDate": "2024-11-14",
+        "tags": ["Presentations"]
+    },
+    {
+        "id": "7",
+        "name": "Code review",
+        "description": "Review code submitted by the development team.",
+        "dueDate": "2024-12-01",
+        "priority": "Medium",
+        "status": "In Progress",
+        "assignedTo": "Carol",
+        "createdDate": "2024-11-20",
+        "tags": ["Development"]
+    },
+    {
+        "id": "8",
+        "name": "Organize files",
+        "description": "Sort and archive old project files in the server.",
+        "dueDate": "2024-12-15",
+        "priority": "Low",
+        "status": "Not Started",
+        "assignedTo": "David",
+        "createdDate": "2024-11-18",
+    }
+]
+
+export function Filter({}) {
+
+}
+
+const DebouncedInput = ({value: initialValue}: { value: string | number }) => {
+    const [value, setValue] = useState(initialValue)
+    const debouncedHandler = useCallback(
+        _.debounce((e) => setValue(e.target.value),
+            300,
+            {
+                trailing: true,
+                leading: false,
+            }),
+        [])
+    return (
+        <input
+            onChange={debouncedHandler}
+            value={value}
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    )
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Page() {
+    const columnDefs = useMemo(() => [
+            {
+                accessorKey: "id",
+                header: "ID",
+
+            },
+            {
+                accessorKey: "name",
+                header: "Name",
+
+            },
+            {
+                accessorKey: "description",
+                header: "Description",
+
+            },
+            {
+                accessorKey: "dueDate",
+                header: "Due Date",
+            },
+            {
+                accessorKey: "priority",
+                header: "Priority",
+            },
+            {
+                accessorKey: "status",
+                header: "Status",
+                cell: ({table, row, column, cell, getValue, renderValue}) => {
+                    const rowValue = renderValue().toLowerCase()
+                    return (
+                        <span className={clsx(
+                            "p-1 px-2 rounded-lg block w-full text-center",
+                            {
+                                "bg-green-400": rowValue === "done",
+                                "bg-yellow-600": rowValue === "in progress",
+                                "bg-gray-500": rowValue === "not started",
+                            })}>
+                            {renderValue()}
+                        </span>
+                    )
+                }
+            },
+            {
+                accessorKey: "assignedTo",
+                header:
+                    "Assigned To",
+            },
+            {
+                accessorKey: "createdDate",
+                header:
+                    "Created Date",
+            },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({table, row, cell, getValue, renderValue}) => {
+                    const tagsValue = typeof renderValue() === "string"
+                        ? renderValue()
+                        : Array.isArray(renderValue())
+                            ? renderValue().map((tag: string) => tag.toLowerCase().trim())
+                            : renderValue();
+
+
+                    return (
+                        <span>
+                            {Array.isArray(tagsValue)
+                                ? tagsValue.map((tag: string, index: number) => (
+                                    <span key={cell.id + "-" + index.toString()}>
+                                    {
+                                        tag === "web development"
+                                            ? <CodeIcon/>
+                                            : tag === "development"
+                                                ? <SettingsIcon/>
+                                                : tag === "client"
+                                                    ? <UserIcon/>
+                                                    : tag === "reports"
+                                                        ? <FileArchiveIcon/>
+                                                        : tag
+
+                                    }
+                                </span>
+
+                                ))
+                                : tagsValue
+                            }
+                        </span>
+                    )
+                }
+
+            }
+        ],
+        []
+    )
+    const table = useReactTable({
+        data: data,
+        columns: columnDefs,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        enableFilters: true,
+        renderFallbackValue: <LucideMessageCircleQuestion/>
+    })
+
+    return (
+        <div className={"flex flex-1 justify-center w-screen h-screen items-center"}>
+            <table className={"border-collapse [&_td]:px-4 [&_td]:py-2 [&_th]:py-2 [&_th]:px-4 overflow-x-scroll"}>
+                <caption>Task Management Table</caption>
+                <thead>
+                {
+                    table.getHeaderGroups().map((hg) => (
+                        <tr className={"bg-gray-500 rounded-lg border-2"} key={hg.id}>
+                            {hg.headers.map((header) => (
+                                <th key={header.id} colSpan={header.colSpan}>
+                                    {flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext(),
+                                    )}
+                                </th>
+                            ))}
+                        </tr>
+                    ))
+                }
+                </thead>
+
+                <tbody>
+                {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+
+                            <td key={cell.id} className={clsx({
+                                // "whitespace-nowrap": cell.column.id.toLowerCase() !== "description",
+                            })}>
+                                {
+                                    flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext())
+                                }
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    )
 }
