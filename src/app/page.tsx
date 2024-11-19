@@ -1,5 +1,5 @@
 "use client";
-import {useCallback, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {flexRender, getCoreRowModel, getFilteredRowModel, useReactTable} from "@tanstack/react-table";
 import clsx from "clsx";
 import _ from "lodash"
@@ -119,19 +119,28 @@ export function Filter({}) {
 
 }
 
-const DebouncedInput = ({value: initialValue}: { value: string | number }) => {
-    const [value, setValue] = useState(initialValue)
-    const debouncedHandler = useCallback(
-        _.debounce((e) => setValue(e.target.value),
-            300,
-            {
-                trailing: true,
-                leading: false,
-            }),
-        [])
+const DebouncedInput = ({
+                            onChange,
+                            debounce = 400,
+                            ...props
+                        }: {
+    debounce: number,
+    onChange: (value: string | number) => void,
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) => {
+    const [value, setValue] = useState(props.value ?? "")
+    const debouncedChange = useCallback(_.debounce(() => {
+        onChange(value)
+    }, debounce, {
+        trailing: true,
+        leading: false,
+    }), [])
+    useEffect(() => {
+        debouncedChange(value)
+    }, [value]);
     return (
         <input
-            onChange={debouncedHandler}
+            {...props}
+            onChange={(e) => setValue(e.target.value)}
             value={value}
         />
     )
